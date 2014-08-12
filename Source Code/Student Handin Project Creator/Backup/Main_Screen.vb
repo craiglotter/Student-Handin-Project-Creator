@@ -1,0 +1,1922 @@
+Imports Microsoft.Win32
+Imports System.IO
+
+Public Class Main_Screen
+    Inherits System.Windows.Forms.Form
+
+
+
+    Dim WithEvents Worker1 As Worker
+    Public Delegate Sub WorkerhHandler(ByVal Result As String)
+    Public Delegate Sub WorkerProgresshHandler(ByVal FoldersCreated As Long)
+
+    Private splash_loader As Splash_Screen
+    Public dataloaded As Boolean = False
+    Private application_exit As Boolean = False
+    Private shutting_down As Boolean = False
+
+    Private InitialRootDirectory As String = ""
+    Private RootDirectory As String = ""
+
+    Private lastDepartments, lastCourses, lastAssignments As String
+
+#Region " Windows Form Designer generated code "
+
+    Public Sub New()
+        MyBase.New()
+
+        'This call is required by the Windows Form Designer.
+        InitializeComponent()
+
+        'Add any initialization after the InitializeComponent() call
+        Worker1 = New Worker
+        AddHandler Worker1.WorkerComplete, AddressOf WorkerHandler
+        AddHandler Worker1.WorkerProgress, AddressOf WorkerProgressHandler
+    End Sub
+
+    Public Sub New(ByVal splash As Splash_Screen)
+        MyBase.New()
+
+        'This call is required by the Windows Form Designer.
+        InitializeComponent()
+
+        'Add any initialization after the InitializeComponent() call
+        splash_loader = splash
+        Worker1 = New Worker
+        AddHandler Worker1.WorkerComplete, AddressOf WorkerHandler
+        AddHandler Worker1.WorkerProgress, AddressOf WorkerProgressHandler
+    End Sub
+    'Form overrides dispose to clean up the component list.
+    Protected Overloads Overrides Sub Dispose(ByVal disposing As Boolean)
+        If disposing Then
+            If Not (components Is Nothing) Then
+                components.Dispose()
+            End If
+        End If
+        MyBase.Dispose(disposing)
+    End Sub
+
+    'Required by the Windows Form Designer
+    Private components As System.ComponentModel.IContainer
+
+    'NOTE: The following procedure is required by the Windows Form Designer
+    'It can be modified using the Windows Form Designer.  
+    'Do not modify it using the code editor.
+    Friend WithEvents ImageList1 As System.Windows.Forms.ImageList
+    Friend WithEvents Timer2 As System.Windows.Forms.Timer
+    Friend WithEvents Label8 As System.Windows.Forms.Label
+    Friend WithEvents NotifyIcon1 As System.Windows.Forms.NotifyIcon
+    Friend WithEvents ContextMenu1 As System.Windows.Forms.ContextMenu
+    Friend WithEvents MenuItem2 As System.Windows.Forms.MenuItem
+    Friend WithEvents MenuItem3 As System.Windows.Forms.MenuItem
+    Friend WithEvents ToolTip1 As System.Windows.Forms.ToolTip
+    Friend WithEvents Label9 As System.Windows.Forms.Label
+    Friend WithEvents Button4 As System.Windows.Forms.Button
+    Friend WithEvents MenuItem1 As System.Windows.Forms.MenuItem
+    Friend WithEvents Button3 As System.Windows.Forms.Button
+    Friend WithEvents Button1 As System.Windows.Forms.Button
+    Friend WithEvents filefoldertxt As System.Windows.Forms.TextBox
+    Friend WithEvents Label19 As System.Windows.Forms.Label
+    Friend WithEvents Label15 As System.Windows.Forms.Label
+    Friend WithEvents Label12 As System.Windows.Forms.Label
+    Friend WithEvents Label11 As System.Windows.Forms.Label
+    Friend WithEvents Label10 As System.Windows.Forms.Label
+    Friend WithEvents Label6 As System.Windows.Forms.Label
+    Friend WithEvents Label5 As System.Windows.Forms.Label
+    Friend WithEvents Label3 As System.Windows.Forms.Label
+    Friend WithEvents Label1 As System.Windows.Forms.Label
+    Friend WithEvents PictureBox5 As System.Windows.Forms.PictureBox
+    Friend WithEvents PictureBox4 As System.Windows.Forms.PictureBox
+    Friend WithEvents PictureBox3 As System.Windows.Forms.PictureBox
+    Friend WithEvents PictureBox2 As System.Windows.Forms.PictureBox
+    Friend WithEvents PictureBox1 As System.Windows.Forms.PictureBox
+    Friend WithEvents Label24 As System.Windows.Forms.Label
+    Friend WithEvents statsDepartment As System.Windows.Forms.Label
+    Friend WithEvents lstDepartment As MTGCComboBox
+    Friend WithEvents lstAssignments As MTGCComboBox
+    Friend WithEvents lstCourses As MTGCComboBox
+    Friend WithEvents statsCourses As System.Windows.Forms.Label
+    Friend WithEvents statsAssignments As System.Windows.Forms.Label
+    Friend WithEvents lblProceed As System.Windows.Forms.Label
+    Friend WithEvents Label16 As System.Windows.Forms.Label
+    Friend WithEvents Label4 As System.Windows.Forms.Label
+    Friend WithEvents Label17 As System.Windows.Forms.Label
+    Friend WithEvents Label13 As System.Windows.Forms.Label
+    Friend WithEvents FolderBrowserDialog1 As System.Windows.Forms.FolderBrowserDialog
+    Friend WithEvents Button2 As System.Windows.Forms.Button
+    Friend WithEvents Panel1 As System.Windows.Forms.Panel
+    Friend WithEvents Panel2 As System.Windows.Forms.Panel
+    Friend WithEvents Label2 As System.Windows.Forms.Label
+    Friend WithEvents Label7 As System.Windows.Forms.Label
+    Friend WithEvents Label14 As System.Windows.Forms.Label
+    Friend WithEvents Label18 As System.Windows.Forms.Label
+    Friend WithEvents Label20 As System.Windows.Forms.Label
+    Friend WithEvents Label21 As System.Windows.Forms.Label
+    Friend WithEvents Label22 As System.Windows.Forms.Label
+    Friend WithEvents Label23 As System.Windows.Forms.Label
+    Friend WithEvents Label25 As System.Windows.Forms.Label
+    Friend WithEvents Label26 As System.Windows.Forms.Label
+    Friend WithEvents yearopen As System.Windows.Forms.TextBox
+    Friend WithEvents monthopen As System.Windows.Forms.TextBox
+    Friend WithEvents dayopen As System.Windows.Forms.TextBox
+    Friend WithEvents houropen As System.Windows.Forms.TextBox
+    Friend WithEvents minuteopen As System.Windows.Forms.TextBox
+    Friend WithEvents minuteclose As System.Windows.Forms.TextBox
+    Friend WithEvents hourclose As System.Windows.Forms.TextBox
+    Friend WithEvents dayclose As System.Windows.Forms.TextBox
+    Friend WithEvents monthclose As System.Windows.Forms.TextBox
+    Friend WithEvents yearclose As System.Windows.Forms.TextBox
+    Friend WithEvents Label27 As System.Windows.Forms.Label
+    Friend WithEvents Label28 As System.Windows.Forms.Label
+    Friend WithEvents Label29 As System.Windows.Forms.Label
+    Friend WithEvents Panel3 As System.Windows.Forms.Panel
+    Friend WithEvents Button5 As System.Windows.Forms.Button
+    <System.Diagnostics.DebuggerStepThrough()> Private Sub InitializeComponent()
+        Me.components = New System.ComponentModel.Container
+        Dim resources As System.Resources.ResourceManager = New System.Resources.ResourceManager(GetType(Main_Screen))
+        Me.ImageList1 = New System.Windows.Forms.ImageList(Me.components)
+        Me.Timer2 = New System.Windows.Forms.Timer(Me.components)
+        Me.Label8 = New System.Windows.Forms.Label
+        Me.NotifyIcon1 = New System.Windows.Forms.NotifyIcon(Me.components)
+        Me.ContextMenu1 = New System.Windows.Forms.ContextMenu
+        Me.MenuItem1 = New System.Windows.Forms.MenuItem
+        Me.MenuItem2 = New System.Windows.Forms.MenuItem
+        Me.MenuItem3 = New System.Windows.Forms.MenuItem
+        Me.ToolTip1 = New System.Windows.Forms.ToolTip(Me.components)
+        Me.Label9 = New System.Windows.Forms.Label
+        Me.Button4 = New System.Windows.Forms.Button
+        Me.Button3 = New System.Windows.Forms.Button
+        Me.Button1 = New System.Windows.Forms.Button
+        Me.filefoldertxt = New System.Windows.Forms.TextBox
+        Me.Label19 = New System.Windows.Forms.Label
+        Me.Label15 = New System.Windows.Forms.Label
+        Me.Label12 = New System.Windows.Forms.Label
+        Me.Label11 = New System.Windows.Forms.Label
+        Me.Label10 = New System.Windows.Forms.Label
+        Me.Label6 = New System.Windows.Forms.Label
+        Me.Label5 = New System.Windows.Forms.Label
+        Me.Label3 = New System.Windows.Forms.Label
+        Me.Button2 = New System.Windows.Forms.Button
+        Me.Label1 = New System.Windows.Forms.Label
+        Me.PictureBox5 = New System.Windows.Forms.PictureBox
+        Me.PictureBox4 = New System.Windows.Forms.PictureBox
+        Me.PictureBox3 = New System.Windows.Forms.PictureBox
+        Me.PictureBox2 = New System.Windows.Forms.PictureBox
+        Me.PictureBox1 = New System.Windows.Forms.PictureBox
+        Me.Label24 = New System.Windows.Forms.Label
+        Me.statsDepartment = New System.Windows.Forms.Label
+        Me.lstDepartment = New MTGCComboBox
+        Me.lstAssignments = New MTGCComboBox
+        Me.lstCourses = New MTGCComboBox
+        Me.statsCourses = New System.Windows.Forms.Label
+        Me.statsAssignments = New System.Windows.Forms.Label
+        Me.lblProceed = New System.Windows.Forms.Label
+        Me.Label16 = New System.Windows.Forms.Label
+        Me.Label4 = New System.Windows.Forms.Label
+        Me.Label17 = New System.Windows.Forms.Label
+        Me.Label13 = New System.Windows.Forms.Label
+        Me.FolderBrowserDialog1 = New System.Windows.Forms.FolderBrowserDialog
+        Me.Panel1 = New System.Windows.Forms.Panel
+        Me.Panel2 = New System.Windows.Forms.Panel
+        Me.yearopen = New System.Windows.Forms.TextBox
+        Me.monthopen = New System.Windows.Forms.TextBox
+        Me.dayopen = New System.Windows.Forms.TextBox
+        Me.houropen = New System.Windows.Forms.TextBox
+        Me.minuteopen = New System.Windows.Forms.TextBox
+        Me.Label2 = New System.Windows.Forms.Label
+        Me.Label7 = New System.Windows.Forms.Label
+        Me.Label14 = New System.Windows.Forms.Label
+        Me.Label18 = New System.Windows.Forms.Label
+        Me.Label20 = New System.Windows.Forms.Label
+        Me.Label21 = New System.Windows.Forms.Label
+        Me.Label22 = New System.Windows.Forms.Label
+        Me.Label23 = New System.Windows.Forms.Label
+        Me.Label25 = New System.Windows.Forms.Label
+        Me.Label26 = New System.Windows.Forms.Label
+        Me.minuteclose = New System.Windows.Forms.TextBox
+        Me.hourclose = New System.Windows.Forms.TextBox
+        Me.dayclose = New System.Windows.Forms.TextBox
+        Me.monthclose = New System.Windows.Forms.TextBox
+        Me.yearclose = New System.Windows.Forms.TextBox
+        Me.Label27 = New System.Windows.Forms.Label
+        Me.Label28 = New System.Windows.Forms.Label
+        Me.Label29 = New System.Windows.Forms.Label
+        Me.Panel3 = New System.Windows.Forms.Panel
+        Me.Button5 = New System.Windows.Forms.Button
+        Me.Panel1.SuspendLayout()
+        Me.Panel2.SuspendLayout()
+        Me.Panel3.SuspendLayout()
+        Me.SuspendLayout()
+        '
+        'ImageList1
+        '
+        Me.ImageList1.ImageSize = New System.Drawing.Size(16, 16)
+        Me.ImageList1.ImageStream = CType(resources.GetObject("ImageList1.ImageStream"), System.Windows.Forms.ImageListStreamer)
+        Me.ImageList1.TransparentColor = System.Drawing.Color.Transparent
+        '
+        'Timer2
+        '
+        Me.Timer2.Interval = 1000
+        '
+        'Label8
+        '
+        Me.Label8.BackColor = System.Drawing.Color.Transparent
+        Me.Label8.Font = New System.Drawing.Font("Microsoft Sans Serif", 7.0!, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, CType(0, Byte))
+        Me.Label8.ForeColor = System.Drawing.Color.Black
+        Me.Label8.Location = New System.Drawing.Point(528, 16)
+        Me.Label8.Name = "Label8"
+        Me.Label8.Size = New System.Drawing.Size(112, 16)
+        Me.Label8.TabIndex = 33
+        Me.Label8.TextAlign = System.Drawing.ContentAlignment.TopRight
+        Me.ToolTip1.SetToolTip(Me.Label8, "Current System Time")
+        '
+        'NotifyIcon1
+        '
+        Me.NotifyIcon1.ContextMenu = Me.ContextMenu1
+        Me.NotifyIcon1.Icon = CType(resources.GetObject("NotifyIcon1.Icon"), System.Drawing.Icon)
+        Me.NotifyIcon1.Text = "Resting..."
+        Me.NotifyIcon1.Visible = True
+        '
+        'ContextMenu1
+        '
+        Me.ContextMenu1.MenuItems.AddRange(New System.Windows.Forms.MenuItem() {Me.MenuItem1, Me.MenuItem2, Me.MenuItem3})
+        '
+        'MenuItem1
+        '
+        Me.MenuItem1.Index = 0
+        Me.MenuItem1.Text = "Display Main Screen"
+        '
+        'MenuItem2
+        '
+        Me.MenuItem2.Index = 1
+        Me.MenuItem2.Text = "-"
+        '
+        'MenuItem3
+        '
+        Me.MenuItem3.Index = 2
+        Me.MenuItem3.Text = "Exit Application"
+        '
+        'Label9
+        '
+        Me.Label9.BackColor = System.Drawing.Color.Transparent
+        Me.Label9.Font = New System.Drawing.Font("Microsoft Sans Serif", 6.2!, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, CType(0, Byte))
+        Me.Label9.ForeColor = System.Drawing.Color.Black
+        Me.Label9.Location = New System.Drawing.Point(528, 0)
+        Me.Label9.Name = "Label9"
+        Me.Label9.Size = New System.Drawing.Size(109, 8)
+        Me.Label9.TabIndex = 54
+        Me.Label9.Text = "BUILD 20060308.3"
+        Me.Label9.TextAlign = System.Drawing.ContentAlignment.TopRight
+        Me.ToolTip1.SetToolTip(Me.Label9, "Application Build Number")
+        '
+        'Button4
+        '
+        Me.Button4.BackColor = System.Drawing.Color.WhiteSmoke
+        Me.Button4.FlatStyle = System.Windows.Forms.FlatStyle.Flat
+        Me.Button4.Font = New System.Drawing.Font("Microsoft Sans Serif", 6.2!, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, CType(0, Byte))
+        Me.Button4.ForeColor = System.Drawing.Color.Black
+        Me.Button4.Location = New System.Drawing.Point(544, 40)
+        Me.Button4.Name = "Button4"
+        Me.Button4.Size = New System.Drawing.Size(88, 16)
+        Me.Button4.TabIndex = 59
+        Me.Button4.Text = "KILL PROCESSES"
+        Me.ToolTip1.SetToolTip(Me.Button4, "Kill All Working Processes")
+        '
+        'Button3
+        '
+        Me.Button3.BackColor = System.Drawing.Color.LightSkyBlue
+        Me.Button3.FlatStyle = System.Windows.Forms.FlatStyle.Flat
+        Me.Button3.ForeColor = System.Drawing.Color.Black
+        Me.Button3.Location = New System.Drawing.Point(512, 416)
+        Me.Button3.Name = "Button3"
+        Me.Button3.Size = New System.Drawing.Size(112, 32)
+        Me.Button3.TabIndex = 82
+        Me.Button3.Text = "Proceed"
+        Me.ToolTip1.SetToolTip(Me.Button3, "Start operation")
+        '
+        'Button1
+        '
+        Me.Button1.BackColor = System.Drawing.Color.Gainsboro
+        Me.Button1.FlatStyle = System.Windows.Forms.FlatStyle.Flat
+        Me.Button1.Font = New System.Drawing.Font("Microsoft Sans Serif", 6.2!, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, CType(0, Byte))
+        Me.Button1.ForeColor = System.Drawing.Color.Black
+        Me.Button1.Location = New System.Drawing.Point(248, 32)
+        Me.Button1.Name = "Button1"
+        Me.Button1.Size = New System.Drawing.Size(56, 20)
+        Me.Button1.TabIndex = 80
+        Me.Button1.Text = "SET"
+        Me.ToolTip1.SetToolTip(Me.Button1, "Set the Root Folder")
+        '
+        'filefoldertxt
+        '
+        Me.filefoldertxt.BackColor = System.Drawing.Color.White
+        Me.filefoldertxt.BorderStyle = System.Windows.Forms.BorderStyle.FixedSingle
+        Me.filefoldertxt.ForeColor = System.Drawing.Color.SteelBlue
+        Me.filefoldertxt.Location = New System.Drawing.Point(8, 32)
+        Me.filefoldertxt.Name = "filefoldertxt"
+        Me.filefoldertxt.Size = New System.Drawing.Size(246, 20)
+        Me.filefoldertxt.TabIndex = 79
+        Me.filefoldertxt.Text = ""
+        Me.ToolTip1.SetToolTip(Me.filefoldertxt, "Base folder to review filenames")
+        '
+        'Label19
+        '
+        Me.Label19.BackColor = System.Drawing.Color.Transparent
+        Me.Label19.ForeColor = System.Drawing.Color.Black
+        Me.Label19.Location = New System.Drawing.Point(136, 56)
+        Me.Label19.Name = "Label19"
+        Me.Label19.Size = New System.Drawing.Size(144, 16)
+        Me.Label19.TabIndex = 76
+        Me.ToolTip1.SetToolTip(Me.Label19, "Time stamp of when operation was completed")
+        '
+        'Label15
+        '
+        Me.Label15.BackColor = System.Drawing.Color.Transparent
+        Me.Label15.ForeColor = System.Drawing.Color.Black
+        Me.Label15.Location = New System.Drawing.Point(8, 56)
+        Me.Label15.Name = "Label15"
+        Me.Label15.Size = New System.Drawing.Size(80, 16)
+        Me.Label15.TabIndex = 75
+        Me.Label15.Text = "Analysis End:"
+        Me.ToolTip1.SetToolTip(Me.Label15, "Time stamp of when operation was completed")
+        '
+        'Label12
+        '
+        Me.Label12.BackColor = System.Drawing.Color.Transparent
+        Me.Label12.ForeColor = System.Drawing.Color.Black
+        Me.Label12.Location = New System.Drawing.Point(136, 40)
+        Me.Label12.Name = "Label12"
+        Me.Label12.Size = New System.Drawing.Size(144, 16)
+        Me.Label12.TabIndex = 74
+        Me.Label12.Text = "0"
+        Me.ToolTip1.SetToolTip(Me.Label12, "Number of files renamed")
+        '
+        'Label11
+        '
+        Me.Label11.BackColor = System.Drawing.Color.Transparent
+        Me.Label11.ForeColor = System.Drawing.Color.Black
+        Me.Label11.Location = New System.Drawing.Point(136, 24)
+        Me.Label11.Name = "Label11"
+        Me.Label11.Size = New System.Drawing.Size(144, 16)
+        Me.Label11.TabIndex = 73
+        Me.ToolTip1.SetToolTip(Me.Label11, "Time stamp of when operation was launched")
+        '
+        'Label10
+        '
+        Me.Label10.BackColor = System.Drawing.Color.Transparent
+        Me.Label10.ForeColor = System.Drawing.Color.Black
+        Me.Label10.Location = New System.Drawing.Point(136, 8)
+        Me.Label10.Name = "Label10"
+        Me.Label10.Size = New System.Drawing.Size(144, 16)
+        Me.Label10.TabIndex = 72
+        Me.ToolTip1.SetToolTip(Me.Label10, "Time stamp of when application was opened")
+        '
+        'Label6
+        '
+        Me.Label6.BackColor = System.Drawing.Color.Transparent
+        Me.Label6.ForeColor = System.Drawing.Color.Black
+        Me.Label6.Location = New System.Drawing.Point(8, 40)
+        Me.Label6.Name = "Label6"
+        Me.Label6.Size = New System.Drawing.Size(136, 16)
+        Me.Label6.TabIndex = 70
+        Me.Label6.Text = "Student Folders Created:"
+        Me.ToolTip1.SetToolTip(Me.Label6, "Student Folders Created")
+        '
+        'Label5
+        '
+        Me.Label5.BackColor = System.Drawing.Color.Transparent
+        Me.Label5.ForeColor = System.Drawing.Color.Black
+        Me.Label5.Location = New System.Drawing.Point(8, 24)
+        Me.Label5.Name = "Label5"
+        Me.Label5.Size = New System.Drawing.Size(112, 16)
+        Me.Label5.TabIndex = 69
+        Me.Label5.Text = "Analysis Start:"
+        Me.ToolTip1.SetToolTip(Me.Label5, "Time stamp of when operation was launched")
+        '
+        'Label3
+        '
+        Me.Label3.BackColor = System.Drawing.Color.Transparent
+        Me.Label3.ForeColor = System.Drawing.Color.Black
+        Me.Label3.Location = New System.Drawing.Point(8, 8)
+        Me.Label3.Name = "Label3"
+        Me.Label3.Size = New System.Drawing.Size(144, 16)
+        Me.Label3.TabIndex = 68
+        Me.Label3.Text = "Program Launched:"
+        Me.ToolTip1.SetToolTip(Me.Label3, "Time stamp of when application was opened")
+        '
+        'Button2
+        '
+        Me.Button2.BackColor = System.Drawing.Color.WhiteSmoke
+        Me.Button2.FlatStyle = System.Windows.Forms.FlatStyle.Flat
+        Me.Button2.Font = New System.Drawing.Font("Microsoft Sans Serif", 6.2!, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, CType(0, Byte))
+        Me.Button2.ForeColor = System.Drawing.Color.Black
+        Me.Button2.Location = New System.Drawing.Point(312, 32)
+        Me.Button2.Name = "Button2"
+        Me.Button2.Size = New System.Drawing.Size(56, 20)
+        Me.Button2.TabIndex = 126
+        Me.Button2.Text = "BROWSE"
+        Me.ToolTip1.SetToolTip(Me.Button2, "Set the Root Folder")
+        '
+        'Label1
+        '
+        Me.Label1.BackColor = System.Drawing.Color.Azure
+        Me.Label1.Font = New System.Drawing.Font("Microsoft Sans Serif", 8.25!, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, CType(0, Byte))
+        Me.Label1.ForeColor = System.Drawing.Color.LimeGreen
+        Me.Label1.Location = New System.Drawing.Point(104, 80)
+        Me.Label1.Name = "Label1"
+        Me.Label1.Size = New System.Drawing.Size(66, 16)
+        Me.Label1.TabIndex = 66
+        Me.Label1.Text = "Waiting"
+        Me.Label1.TextAlign = System.Drawing.ContentAlignment.MiddleLeft
+        '
+        'PictureBox5
+        '
+        Me.PictureBox5.BackColor = System.Drawing.Color.AliceBlue
+        Me.PictureBox5.BackgroundImage = CType(resources.GetObject("PictureBox5.BackgroundImage"), System.Drawing.Image)
+        Me.PictureBox5.ForeColor = System.Drawing.Color.Black
+        Me.PictureBox5.Location = New System.Drawing.Point(80, 80)
+        Me.PictureBox5.Name = "PictureBox5"
+        Me.PictureBox5.Size = New System.Drawing.Size(16, 16)
+        Me.PictureBox5.TabIndex = 65
+        Me.PictureBox5.TabStop = False
+        '
+        'PictureBox4
+        '
+        Me.PictureBox4.BackColor = System.Drawing.Color.AliceBlue
+        Me.PictureBox4.BackgroundImage = CType(resources.GetObject("PictureBox4.BackgroundImage"), System.Drawing.Image)
+        Me.PictureBox4.ForeColor = System.Drawing.Color.Black
+        Me.PictureBox4.Location = New System.Drawing.Point(64, 80)
+        Me.PictureBox4.Name = "PictureBox4"
+        Me.PictureBox4.Size = New System.Drawing.Size(16, 16)
+        Me.PictureBox4.TabIndex = 64
+        Me.PictureBox4.TabStop = False
+        '
+        'PictureBox3
+        '
+        Me.PictureBox3.BackColor = System.Drawing.Color.AliceBlue
+        Me.PictureBox3.BackgroundImage = CType(resources.GetObject("PictureBox3.BackgroundImage"), System.Drawing.Image)
+        Me.PictureBox3.ForeColor = System.Drawing.Color.Black
+        Me.PictureBox3.Location = New System.Drawing.Point(48, 80)
+        Me.PictureBox3.Name = "PictureBox3"
+        Me.PictureBox3.Size = New System.Drawing.Size(16, 16)
+        Me.PictureBox3.TabIndex = 63
+        Me.PictureBox3.TabStop = False
+        '
+        'PictureBox2
+        '
+        Me.PictureBox2.BackColor = System.Drawing.Color.AliceBlue
+        Me.PictureBox2.BackgroundImage = CType(resources.GetObject("PictureBox2.BackgroundImage"), System.Drawing.Image)
+        Me.PictureBox2.ForeColor = System.Drawing.Color.Black
+        Me.PictureBox2.Location = New System.Drawing.Point(32, 80)
+        Me.PictureBox2.Name = "PictureBox2"
+        Me.PictureBox2.Size = New System.Drawing.Size(16, 16)
+        Me.PictureBox2.TabIndex = 62
+        Me.PictureBox2.TabStop = False
+        '
+        'PictureBox1
+        '
+        Me.PictureBox1.BackColor = System.Drawing.Color.AliceBlue
+        Me.PictureBox1.BackgroundImage = CType(resources.GetObject("PictureBox1.BackgroundImage"), System.Drawing.Image)
+        Me.PictureBox1.ForeColor = System.Drawing.Color.Black
+        Me.PictureBox1.Location = New System.Drawing.Point(16, 80)
+        Me.PictureBox1.Name = "PictureBox1"
+        Me.PictureBox1.Size = New System.Drawing.Size(16, 16)
+        Me.PictureBox1.TabIndex = 61
+        Me.PictureBox1.TabStop = False
+        '
+        'Label24
+        '
+        Me.Label24.BackColor = System.Drawing.Color.Transparent
+        Me.Label24.Font = New System.Drawing.Font("Microsoft Sans Serif", 6.2!, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, CType(0, Byte))
+        Me.Label24.ForeColor = System.Drawing.Color.Black
+        Me.Label24.Location = New System.Drawing.Point(8, 16)
+        Me.Label24.Name = "Label24"
+        Me.Label24.Size = New System.Drawing.Size(192, 16)
+        Me.Label24.TabIndex = 81
+        Me.Label24.Text = "ROOT HAND-IN FOLDER"
+        Me.Label24.TextAlign = System.Drawing.ContentAlignment.BottomLeft
+        '
+        'statsDepartment
+        '
+        Me.statsDepartment.ForeColor = System.Drawing.Color.DimGray
+        Me.statsDepartment.Location = New System.Drawing.Point(280, 72)
+        Me.statsDepartment.Name = "statsDepartment"
+        Me.statsDepartment.Size = New System.Drawing.Size(320, 40)
+        Me.statsDepartment.TabIndex = 90
+        '
+        'lstDepartment
+        '
+        Me.lstDepartment.BackColor = System.Drawing.Color.White
+        Me.lstDepartment.BorderStyle = MTGCComboBox.TipiBordi.FlatXP
+        Me.lstDepartment.CharacterCasing = System.Windows.Forms.CharacterCasing.Normal
+        Me.lstDepartment.ColumnNum = 1
+        Me.lstDepartment.ColumnWidth = "121"
+        Me.lstDepartment.DisplayMember = "Text"
+        Me.lstDepartment.DrawMode = System.Windows.Forms.DrawMode.OwnerDrawFixed
+        Me.lstDepartment.DropDownArrowBackColor = System.Drawing.Color.FromArgb(CType(136, Byte), CType(169, Byte), CType(223, Byte))
+        Me.lstDepartment.DropDownBackColor = System.Drawing.Color.FromArgb(CType(193, Byte), CType(210, Byte), CType(238, Byte))
+        Me.lstDepartment.DropDownForeColor = System.Drawing.Color.Black
+        Me.lstDepartment.DropDownStyle = MTGCComboBox.CustomDropDownStyle.DropDown
+        Me.lstDepartment.DropDownWidth = 141
+        Me.lstDepartment.Font = New System.Drawing.Font("Microsoft Sans Serif", 8.25!, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, CType(0, Byte))
+        Me.lstDepartment.ForeColor = System.Drawing.Color.SteelBlue
+        Me.lstDepartment.GridLineColor = System.Drawing.Color.Transparent
+        Me.lstDepartment.GridLineHorizontal = False
+        Me.lstDepartment.GridLineVertical = False
+        Me.lstDepartment.HighlightBorderColor = System.Drawing.Color.Black
+        Me.lstDepartment.HighlightBorderOnMouseEvents = True
+        Me.lstDepartment.LoadingType = MTGCComboBox.CaricamentoCombo.ComboBoxItem
+        Me.lstDepartment.Location = New System.Drawing.Point(8, 72)
+        Me.lstDepartment.ManagingFastMouseMoving = True
+        Me.lstDepartment.ManagingFastMouseMovingInterval = 30
+        Me.lstDepartment.Name = "lstDepartment"
+        Me.lstDepartment.NormalBorderColor = System.Drawing.Color.Black
+        Me.lstDepartment.Size = New System.Drawing.Size(264, 21)
+        Me.lstDepartment.TabIndex = 92
+        Me.lstDepartment.TabStop = False
+        '
+        'lstAssignments
+        '
+        Me.lstAssignments.BackColor = System.Drawing.Color.White
+        Me.lstAssignments.BorderStyle = MTGCComboBox.TipiBordi.FlatXP
+        Me.lstAssignments.CharacterCasing = System.Windows.Forms.CharacterCasing.Normal
+        Me.lstAssignments.ColumnNum = 1
+        Me.lstAssignments.ColumnWidth = "121"
+        Me.lstAssignments.DisplayMember = "Text"
+        Me.lstAssignments.DrawMode = System.Windows.Forms.DrawMode.OwnerDrawFixed
+        Me.lstAssignments.DropDownArrowBackColor = System.Drawing.Color.FromArgb(CType(136, Byte), CType(169, Byte), CType(223, Byte))
+        Me.lstAssignments.DropDownBackColor = System.Drawing.Color.FromArgb(CType(193, Byte), CType(210, Byte), CType(238, Byte))
+        Me.lstAssignments.DropDownForeColor = System.Drawing.Color.Black
+        Me.lstAssignments.DropDownStyle = MTGCComboBox.CustomDropDownStyle.DropDown
+        Me.lstAssignments.DropDownWidth = 141
+        Me.lstAssignments.Font = New System.Drawing.Font("Microsoft Sans Serif", 8.25!, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, CType(0, Byte))
+        Me.lstAssignments.ForeColor = System.Drawing.Color.SteelBlue
+        Me.lstAssignments.GridLineColor = System.Drawing.Color.Transparent
+        Me.lstAssignments.GridLineHorizontal = False
+        Me.lstAssignments.GridLineVertical = False
+        Me.lstAssignments.HighlightBorderColor = System.Drawing.Color.Black
+        Me.lstAssignments.HighlightBorderOnMouseEvents = True
+        Me.lstAssignments.LoadingType = MTGCComboBox.CaricamentoCombo.ComboBoxItem
+        Me.lstAssignments.Location = New System.Drawing.Point(8, 152)
+        Me.lstAssignments.ManagingFastMouseMoving = True
+        Me.lstAssignments.ManagingFastMouseMovingInterval = 30
+        Me.lstAssignments.Name = "lstAssignments"
+        Me.lstAssignments.NormalBorderColor = System.Drawing.Color.Black
+        Me.lstAssignments.Size = New System.Drawing.Size(264, 21)
+        Me.lstAssignments.TabIndex = 99
+        Me.lstAssignments.TabStop = False
+        '
+        'lstCourses
+        '
+        Me.lstCourses.BackColor = System.Drawing.Color.White
+        Me.lstCourses.BorderStyle = MTGCComboBox.TipiBordi.FlatXP
+        Me.lstCourses.CharacterCasing = System.Windows.Forms.CharacterCasing.Normal
+        Me.lstCourses.ColumnNum = 1
+        Me.lstCourses.ColumnWidth = "121"
+        Me.lstCourses.DisplayMember = "Text"
+        Me.lstCourses.DrawMode = System.Windows.Forms.DrawMode.OwnerDrawFixed
+        Me.lstCourses.DropDownArrowBackColor = System.Drawing.Color.FromArgb(CType(136, Byte), CType(169, Byte), CType(223, Byte))
+        Me.lstCourses.DropDownBackColor = System.Drawing.Color.FromArgb(CType(193, Byte), CType(210, Byte), CType(238, Byte))
+        Me.lstCourses.DropDownForeColor = System.Drawing.Color.Black
+        Me.lstCourses.DropDownStyle = MTGCComboBox.CustomDropDownStyle.DropDown
+        Me.lstCourses.DropDownWidth = 141
+        Me.lstCourses.Font = New System.Drawing.Font("Microsoft Sans Serif", 8.25!, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, CType(0, Byte))
+        Me.lstCourses.ForeColor = System.Drawing.Color.SteelBlue
+        Me.lstCourses.GridLineColor = System.Drawing.Color.Transparent
+        Me.lstCourses.GridLineHorizontal = False
+        Me.lstCourses.GridLineVertical = False
+        Me.lstCourses.HighlightBorderColor = System.Drawing.Color.Black
+        Me.lstCourses.HighlightBorderOnMouseEvents = True
+        Me.lstCourses.LoadingType = MTGCComboBox.CaricamentoCombo.ComboBoxItem
+        Me.lstCourses.Location = New System.Drawing.Point(8, 112)
+        Me.lstCourses.ManagingFastMouseMoving = True
+        Me.lstCourses.ManagingFastMouseMovingInterval = 30
+        Me.lstCourses.Name = "lstCourses"
+        Me.lstCourses.NormalBorderColor = System.Drawing.Color.Black
+        Me.lstCourses.Size = New System.Drawing.Size(264, 21)
+        Me.lstCourses.TabIndex = 95
+        Me.lstCourses.TabStop = False
+        '
+        'statsCourses
+        '
+        Me.statsCourses.ForeColor = System.Drawing.Color.DimGray
+        Me.statsCourses.Location = New System.Drawing.Point(280, 112)
+        Me.statsCourses.Name = "statsCourses"
+        Me.statsCourses.Size = New System.Drawing.Size(320, 40)
+        Me.statsCourses.TabIndex = 97
+        '
+        'statsAssignments
+        '
+        Me.statsAssignments.ForeColor = System.Drawing.Color.DimGray
+        Me.statsAssignments.Location = New System.Drawing.Point(280, 152)
+        Me.statsAssignments.Name = "statsAssignments"
+        Me.statsAssignments.Size = New System.Drawing.Size(320, 40)
+        Me.statsAssignments.TabIndex = 101
+        '
+        'lblProceed
+        '
+        Me.lblProceed.ForeColor = System.Drawing.Color.DarkGray
+        Me.lblProceed.Location = New System.Drawing.Point(16, 464)
+        Me.lblProceed.Name = "lblProceed"
+        Me.lblProceed.Size = New System.Drawing.Size(624, 24)
+        Me.lblProceed.TabIndex = 121
+        Me.lblProceed.TextAlign = System.Drawing.ContentAlignment.MiddleRight
+        '
+        'Label16
+        '
+        Me.Label16.Location = New System.Drawing.Point(8, 8)
+        Me.Label16.Name = "Label16"
+        Me.Label16.Size = New System.Drawing.Size(480, 72)
+        Me.Label16.TabIndex = 122
+        Me.Label16.Text = "To create a hand-in project in the Root Directory, simply select from existing fo" & _
+        "lder names or type in new folder names in the ""Department"" and ""Course"" drop dow" & _
+        "n lists. Enter the Project Title last and adjust the project access date/time ac" & _
+        "cordingly. Once you click on the ""Proceed"" button you will be prompted to accept" & _
+        " the given project hand-in path to be created, which you need to accept in order" & _
+        " to continue."
+        '
+        'Label4
+        '
+        Me.Label4.BackColor = System.Drawing.Color.Transparent
+        Me.Label4.Font = New System.Drawing.Font("Microsoft Sans Serif", 6.2!, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, CType(0, Byte))
+        Me.Label4.ForeColor = System.Drawing.Color.Black
+        Me.Label4.Location = New System.Drawing.Point(8, 56)
+        Me.Label4.Name = "Label4"
+        Me.Label4.Size = New System.Drawing.Size(192, 16)
+        Me.Label4.TabIndex = 123
+        Me.Label4.Text = "DEPARTMENT FOLDER"
+        Me.Label4.TextAlign = System.Drawing.ContentAlignment.BottomLeft
+        '
+        'Label17
+        '
+        Me.Label17.BackColor = System.Drawing.Color.Transparent
+        Me.Label17.Font = New System.Drawing.Font("Microsoft Sans Serif", 6.2!, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, CType(0, Byte))
+        Me.Label17.ForeColor = System.Drawing.Color.Black
+        Me.Label17.Location = New System.Drawing.Point(8, 96)
+        Me.Label17.Name = "Label17"
+        Me.Label17.Size = New System.Drawing.Size(192, 16)
+        Me.Label17.TabIndex = 124
+        Me.Label17.Text = "COURSE FOLDER"
+        Me.Label17.TextAlign = System.Drawing.ContentAlignment.BottomLeft
+        '
+        'Label13
+        '
+        Me.Label13.BackColor = System.Drawing.Color.Transparent
+        Me.Label13.Font = New System.Drawing.Font("Microsoft Sans Serif", 6.2!, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, CType(0, Byte))
+        Me.Label13.ForeColor = System.Drawing.Color.Black
+        Me.Label13.Location = New System.Drawing.Point(8, 136)
+        Me.Label13.Name = "Label13"
+        Me.Label13.Size = New System.Drawing.Size(192, 16)
+        Me.Label13.TabIndex = 125
+        Me.Label13.Text = "PROJECT TITLE / FOLDER"
+        Me.Label13.TextAlign = System.Drawing.ContentAlignment.BottomLeft
+        '
+        'FolderBrowserDialog1
+        '
+        Me.FolderBrowserDialog1.Description = "Select the Hand-in root directory"
+        '
+        'Panel1
+        '
+        Me.Panel1.BackColor = System.Drawing.Color.Azure
+        Me.Panel1.BorderStyle = System.Windows.Forms.BorderStyle.FixedSingle
+        Me.Panel1.Controls.Add(Me.Label10)
+        Me.Panel1.Controls.Add(Me.Label11)
+        Me.Panel1.Controls.Add(Me.Label12)
+        Me.Panel1.Controls.Add(Me.Label19)
+        Me.Panel1.Controls.Add(Me.Label5)
+        Me.Panel1.Controls.Add(Me.Label6)
+        Me.Panel1.Controls.Add(Me.Label15)
+        Me.Panel1.Controls.Add(Me.Label3)
+        Me.Panel1.Controls.Add(Me.Label1)
+        Me.Panel1.Controls.Add(Me.PictureBox5)
+        Me.Panel1.Controls.Add(Me.PictureBox4)
+        Me.Panel1.Controls.Add(Me.PictureBox3)
+        Me.Panel1.Controls.Add(Me.PictureBox2)
+        Me.Panel1.Controls.Add(Me.PictureBox1)
+        Me.Panel1.Location = New System.Drawing.Point(16, 352)
+        Me.Panel1.Name = "Panel1"
+        Me.Panel1.Size = New System.Drawing.Size(288, 112)
+        Me.Panel1.TabIndex = 127
+        '
+        'Panel2
+        '
+        Me.Panel2.BackColor = System.Drawing.Color.Azure
+        Me.Panel2.BorderStyle = System.Windows.Forms.BorderStyle.FixedSingle
+        Me.Panel2.Controls.Add(Me.Label16)
+        Me.Panel2.Location = New System.Drawing.Point(16, 8)
+        Me.Panel2.Name = "Panel2"
+        Me.Panel2.Size = New System.Drawing.Size(480, 80)
+        Me.Panel2.TabIndex = 128
+        '
+        'yearopen
+        '
+        Me.yearopen.BackColor = System.Drawing.Color.White
+        Me.yearopen.BorderStyle = System.Windows.Forms.BorderStyle.FixedSingle
+        Me.yearopen.ForeColor = System.Drawing.Color.SteelBlue
+        Me.yearopen.Location = New System.Drawing.Point(112, 200)
+        Me.yearopen.MaxLength = 4
+        Me.yearopen.Name = "yearopen"
+        Me.yearopen.Size = New System.Drawing.Size(32, 20)
+        Me.yearopen.TabIndex = 129
+        Me.yearopen.Text = "2006"
+        '
+        'monthopen
+        '
+        Me.monthopen.BackColor = System.Drawing.Color.White
+        Me.monthopen.BorderStyle = System.Windows.Forms.BorderStyle.FixedSingle
+        Me.monthopen.ForeColor = System.Drawing.Color.SteelBlue
+        Me.monthopen.Location = New System.Drawing.Point(144, 200)
+        Me.monthopen.MaxLength = 2
+        Me.monthopen.Name = "monthopen"
+        Me.monthopen.Size = New System.Drawing.Size(24, 20)
+        Me.monthopen.TabIndex = 130
+        Me.monthopen.Text = "22"
+        '
+        'dayopen
+        '
+        Me.dayopen.BackColor = System.Drawing.Color.White
+        Me.dayopen.BorderStyle = System.Windows.Forms.BorderStyle.FixedSingle
+        Me.dayopen.ForeColor = System.Drawing.Color.SteelBlue
+        Me.dayopen.Location = New System.Drawing.Point(168, 200)
+        Me.dayopen.MaxLength = 2
+        Me.dayopen.Name = "dayopen"
+        Me.dayopen.Size = New System.Drawing.Size(24, 20)
+        Me.dayopen.TabIndex = 131
+        Me.dayopen.Text = "33"
+        '
+        'houropen
+        '
+        Me.houropen.BackColor = System.Drawing.Color.White
+        Me.houropen.BorderStyle = System.Windows.Forms.BorderStyle.FixedSingle
+        Me.houropen.ForeColor = System.Drawing.Color.SteelBlue
+        Me.houropen.Location = New System.Drawing.Point(200, 200)
+        Me.houropen.MaxLength = 2
+        Me.houropen.Name = "houropen"
+        Me.houropen.Size = New System.Drawing.Size(24, 20)
+        Me.houropen.TabIndex = 132
+        Me.houropen.Text = "08"
+        '
+        'minuteopen
+        '
+        Me.minuteopen.BackColor = System.Drawing.Color.White
+        Me.minuteopen.BorderStyle = System.Windows.Forms.BorderStyle.FixedSingle
+        Me.minuteopen.ForeColor = System.Drawing.Color.SteelBlue
+        Me.minuteopen.Location = New System.Drawing.Point(224, 200)
+        Me.minuteopen.MaxLength = 2
+        Me.minuteopen.Name = "minuteopen"
+        Me.minuteopen.Size = New System.Drawing.Size(24, 20)
+        Me.minuteopen.TabIndex = 133
+        Me.minuteopen.Text = "44"
+        '
+        'Label2
+        '
+        Me.Label2.BackColor = System.Drawing.Color.AliceBlue
+        Me.Label2.Font = New System.Drawing.Font("Microsoft Sans Serif", 6.2!, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, CType(0, Byte))
+        Me.Label2.ForeColor = System.Drawing.Color.Black
+        Me.Label2.Location = New System.Drawing.Point(112, 216)
+        Me.Label2.Name = "Label2"
+        Me.Label2.Size = New System.Drawing.Size(32, 16)
+        Me.Label2.TabIndex = 134
+        Me.Label2.Text = "YEAR"
+        Me.Label2.TextAlign = System.Drawing.ContentAlignment.BottomLeft
+        '
+        'Label7
+        '
+        Me.Label7.BackColor = System.Drawing.Color.AliceBlue
+        Me.Label7.Font = New System.Drawing.Font("Microsoft Sans Serif", 6.2!, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, CType(0, Byte))
+        Me.Label7.ForeColor = System.Drawing.Color.Black
+        Me.Label7.Location = New System.Drawing.Point(144, 216)
+        Me.Label7.Name = "Label7"
+        Me.Label7.Size = New System.Drawing.Size(24, 16)
+        Me.Label7.TabIndex = 135
+        Me.Label7.Text = "MTH"
+        Me.Label7.TextAlign = System.Drawing.ContentAlignment.BottomLeft
+        '
+        'Label14
+        '
+        Me.Label14.BackColor = System.Drawing.Color.AliceBlue
+        Me.Label14.Font = New System.Drawing.Font("Microsoft Sans Serif", 6.2!, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, CType(0, Byte))
+        Me.Label14.ForeColor = System.Drawing.Color.Black
+        Me.Label14.Location = New System.Drawing.Point(168, 216)
+        Me.Label14.Name = "Label14"
+        Me.Label14.Size = New System.Drawing.Size(24, 16)
+        Me.Label14.TabIndex = 136
+        Me.Label14.Text = "DAY"
+        Me.Label14.TextAlign = System.Drawing.ContentAlignment.BottomLeft
+        '
+        'Label18
+        '
+        Me.Label18.BackColor = System.Drawing.Color.AliceBlue
+        Me.Label18.Font = New System.Drawing.Font("Microsoft Sans Serif", 6.2!, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, CType(0, Byte))
+        Me.Label18.ForeColor = System.Drawing.Color.Black
+        Me.Label18.Location = New System.Drawing.Point(200, 216)
+        Me.Label18.Name = "Label18"
+        Me.Label18.Size = New System.Drawing.Size(24, 16)
+        Me.Label18.TabIndex = 137
+        Me.Label18.Text = "HH"
+        Me.Label18.TextAlign = System.Drawing.ContentAlignment.BottomLeft
+        '
+        'Label20
+        '
+        Me.Label20.BackColor = System.Drawing.Color.AliceBlue
+        Me.Label20.Font = New System.Drawing.Font("Microsoft Sans Serif", 6.2!, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, CType(0, Byte))
+        Me.Label20.ForeColor = System.Drawing.Color.Black
+        Me.Label20.Location = New System.Drawing.Point(224, 216)
+        Me.Label20.Name = "Label20"
+        Me.Label20.Size = New System.Drawing.Size(24, 16)
+        Me.Label20.TabIndex = 138
+        Me.Label20.Text = "MM"
+        Me.Label20.TextAlign = System.Drawing.ContentAlignment.BottomLeft
+        '
+        'Label21
+        '
+        Me.Label21.BackColor = System.Drawing.Color.AliceBlue
+        Me.Label21.Font = New System.Drawing.Font("Microsoft Sans Serif", 6.2!, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, CType(0, Byte))
+        Me.Label21.ForeColor = System.Drawing.Color.Black
+        Me.Label21.Location = New System.Drawing.Point(472, 216)
+        Me.Label21.Name = "Label21"
+        Me.Label21.Size = New System.Drawing.Size(24, 16)
+        Me.Label21.TabIndex = 148
+        Me.Label21.Text = "MM"
+        Me.Label21.TextAlign = System.Drawing.ContentAlignment.BottomLeft
+        '
+        'Label22
+        '
+        Me.Label22.BackColor = System.Drawing.Color.AliceBlue
+        Me.Label22.Font = New System.Drawing.Font("Microsoft Sans Serif", 6.2!, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, CType(0, Byte))
+        Me.Label22.ForeColor = System.Drawing.Color.Black
+        Me.Label22.Location = New System.Drawing.Point(448, 216)
+        Me.Label22.Name = "Label22"
+        Me.Label22.Size = New System.Drawing.Size(24, 16)
+        Me.Label22.TabIndex = 147
+        Me.Label22.Text = "HH"
+        Me.Label22.TextAlign = System.Drawing.ContentAlignment.BottomLeft
+        '
+        'Label23
+        '
+        Me.Label23.BackColor = System.Drawing.Color.AliceBlue
+        Me.Label23.Font = New System.Drawing.Font("Microsoft Sans Serif", 6.2!, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, CType(0, Byte))
+        Me.Label23.ForeColor = System.Drawing.Color.Black
+        Me.Label23.Location = New System.Drawing.Point(416, 216)
+        Me.Label23.Name = "Label23"
+        Me.Label23.Size = New System.Drawing.Size(24, 16)
+        Me.Label23.TabIndex = 146
+        Me.Label23.Text = "DAY"
+        Me.Label23.TextAlign = System.Drawing.ContentAlignment.BottomLeft
+        '
+        'Label25
+        '
+        Me.Label25.BackColor = System.Drawing.Color.AliceBlue
+        Me.Label25.Font = New System.Drawing.Font("Microsoft Sans Serif", 6.2!, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, CType(0, Byte))
+        Me.Label25.ForeColor = System.Drawing.Color.Black
+        Me.Label25.Location = New System.Drawing.Point(392, 216)
+        Me.Label25.Name = "Label25"
+        Me.Label25.Size = New System.Drawing.Size(24, 16)
+        Me.Label25.TabIndex = 145
+        Me.Label25.Text = "MTH"
+        Me.Label25.TextAlign = System.Drawing.ContentAlignment.BottomLeft
+        '
+        'Label26
+        '
+        Me.Label26.BackColor = System.Drawing.Color.AliceBlue
+        Me.Label26.Font = New System.Drawing.Font("Microsoft Sans Serif", 6.2!, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, CType(0, Byte))
+        Me.Label26.ForeColor = System.Drawing.Color.Black
+        Me.Label26.Location = New System.Drawing.Point(360, 216)
+        Me.Label26.Name = "Label26"
+        Me.Label26.Size = New System.Drawing.Size(32, 16)
+        Me.Label26.TabIndex = 144
+        Me.Label26.Text = "YEAR"
+        Me.Label26.TextAlign = System.Drawing.ContentAlignment.BottomLeft
+        '
+        'minuteclose
+        '
+        Me.minuteclose.BackColor = System.Drawing.Color.White
+        Me.minuteclose.BorderStyle = System.Windows.Forms.BorderStyle.FixedSingle
+        Me.minuteclose.ForeColor = System.Drawing.Color.SteelBlue
+        Me.minuteclose.Location = New System.Drawing.Point(472, 200)
+        Me.minuteclose.MaxLength = 2
+        Me.minuteclose.Name = "minuteclose"
+        Me.minuteclose.Size = New System.Drawing.Size(24, 20)
+        Me.minuteclose.TabIndex = 143
+        Me.minuteclose.Text = "44"
+        '
+        'hourclose
+        '
+        Me.hourclose.BackColor = System.Drawing.Color.White
+        Me.hourclose.BorderStyle = System.Windows.Forms.BorderStyle.FixedSingle
+        Me.hourclose.ForeColor = System.Drawing.Color.SteelBlue
+        Me.hourclose.Location = New System.Drawing.Point(448, 200)
+        Me.hourclose.MaxLength = 2
+        Me.hourclose.Name = "hourclose"
+        Me.hourclose.Size = New System.Drawing.Size(24, 20)
+        Me.hourclose.TabIndex = 142
+        Me.hourclose.Text = "08"
+        '
+        'dayclose
+        '
+        Me.dayclose.BackColor = System.Drawing.Color.White
+        Me.dayclose.BorderStyle = System.Windows.Forms.BorderStyle.FixedSingle
+        Me.dayclose.ForeColor = System.Drawing.Color.SteelBlue
+        Me.dayclose.Location = New System.Drawing.Point(416, 200)
+        Me.dayclose.MaxLength = 2
+        Me.dayclose.Name = "dayclose"
+        Me.dayclose.Size = New System.Drawing.Size(24, 20)
+        Me.dayclose.TabIndex = 141
+        Me.dayclose.Text = "33"
+        '
+        'monthclose
+        '
+        Me.monthclose.BackColor = System.Drawing.Color.White
+        Me.monthclose.BorderStyle = System.Windows.Forms.BorderStyle.FixedSingle
+        Me.monthclose.ForeColor = System.Drawing.Color.SteelBlue
+        Me.monthclose.Location = New System.Drawing.Point(392, 200)
+        Me.monthclose.MaxLength = 2
+        Me.monthclose.Name = "monthclose"
+        Me.monthclose.Size = New System.Drawing.Size(24, 20)
+        Me.monthclose.TabIndex = 140
+        Me.monthclose.Text = "22"
+        '
+        'yearclose
+        '
+        Me.yearclose.BackColor = System.Drawing.Color.White
+        Me.yearclose.BorderStyle = System.Windows.Forms.BorderStyle.FixedSingle
+        Me.yearclose.ForeColor = System.Drawing.Color.SteelBlue
+        Me.yearclose.Location = New System.Drawing.Point(360, 200)
+        Me.yearclose.MaxLength = 4
+        Me.yearclose.Name = "yearclose"
+        Me.yearclose.Size = New System.Drawing.Size(32, 20)
+        Me.yearclose.TabIndex = 139
+        Me.yearclose.Text = "2006"
+        '
+        'Label27
+        '
+        Me.Label27.BackColor = System.Drawing.Color.Transparent
+        Me.Label27.Font = New System.Drawing.Font("Microsoft Sans Serif", 6.2!, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, CType(0, Byte))
+        Me.Label27.ForeColor = System.Drawing.Color.Black
+        Me.Label27.Location = New System.Drawing.Point(8, 176)
+        Me.Label27.Name = "Label27"
+        Me.Label27.Size = New System.Drawing.Size(192, 16)
+        Me.Label27.TabIndex = 149
+        Me.Label27.Text = "PROJECT ACCESS TIME FRAME"
+        Me.Label27.TextAlign = System.Drawing.ContentAlignment.BottomLeft
+        '
+        'Label28
+        '
+        Me.Label28.BackColor = System.Drawing.Color.AliceBlue
+        Me.Label28.Location = New System.Drawing.Point(24, 208)
+        Me.Label28.Name = "Label28"
+        Me.Label28.Size = New System.Drawing.Size(80, 16)
+        Me.Label28.TabIndex = 150
+        Me.Label28.Text = "Open Window:"
+        '
+        'Label29
+        '
+        Me.Label29.BackColor = System.Drawing.Color.AliceBlue
+        Me.Label29.Location = New System.Drawing.Point(272, 208)
+        Me.Label29.Name = "Label29"
+        Me.Label29.Size = New System.Drawing.Size(80, 16)
+        Me.Label29.TabIndex = 151
+        Me.Label29.Text = "Close Window:"
+        '
+        'Panel3
+        '
+        Me.Panel3.BackColor = System.Drawing.Color.AliceBlue
+        Me.Panel3.BorderStyle = System.Windows.Forms.BorderStyle.FixedSingle
+        Me.Panel3.Controls.Add(Me.Label28)
+        Me.Panel3.Controls.Add(Me.yearopen)
+        Me.Panel3.Controls.Add(Me.monthopen)
+        Me.Panel3.Controls.Add(Me.dayopen)
+        Me.Panel3.Controls.Add(Me.houropen)
+        Me.Panel3.Controls.Add(Me.minuteopen)
+        Me.Panel3.Controls.Add(Me.Label2)
+        Me.Panel3.Controls.Add(Me.Label7)
+        Me.Panel3.Controls.Add(Me.Label14)
+        Me.Panel3.Controls.Add(Me.Label18)
+        Me.Panel3.Controls.Add(Me.Label20)
+        Me.Panel3.Controls.Add(Me.Label27)
+        Me.Panel3.Controls.Add(Me.Button1)
+        Me.Panel3.Controls.Add(Me.filefoldertxt)
+        Me.Panel3.Controls.Add(Me.Button2)
+        Me.Panel3.Controls.Add(Me.Label24)
+        Me.Panel3.Controls.Add(Me.statsDepartment)
+        Me.Panel3.Controls.Add(Me.lstDepartment)
+        Me.Panel3.Controls.Add(Me.lstAssignments)
+        Me.Panel3.Controls.Add(Me.lstCourses)
+        Me.Panel3.Controls.Add(Me.statsCourses)
+        Me.Panel3.Controls.Add(Me.minuteclose)
+        Me.Panel3.Controls.Add(Me.hourclose)
+        Me.Panel3.Controls.Add(Me.dayclose)
+        Me.Panel3.Controls.Add(Me.monthclose)
+        Me.Panel3.Controls.Add(Me.yearclose)
+        Me.Panel3.Controls.Add(Me.Label29)
+        Me.Panel3.Controls.Add(Me.statsAssignments)
+        Me.Panel3.Controls.Add(Me.Label4)
+        Me.Panel3.Controls.Add(Me.Label17)
+        Me.Panel3.Controls.Add(Me.Label13)
+        Me.Panel3.Controls.Add(Me.Label21)
+        Me.Panel3.Controls.Add(Me.Label22)
+        Me.Panel3.Controls.Add(Me.Label23)
+        Me.Panel3.Controls.Add(Me.Label25)
+        Me.Panel3.Controls.Add(Me.Label26)
+        Me.Panel3.Location = New System.Drawing.Point(16, 96)
+        Me.Panel3.Name = "Panel3"
+        Me.Panel3.Size = New System.Drawing.Size(608, 248)
+        Me.Panel3.TabIndex = 152
+        '
+        'Button5
+        '
+        Me.Button5.BackColor = System.Drawing.Color.LightCyan
+        Me.Button5.FlatStyle = System.Windows.Forms.FlatStyle.Flat
+        Me.Button5.Location = New System.Drawing.Point(488, 352)
+        Me.Button5.Name = "Button5"
+        Me.Button5.Size = New System.Drawing.Size(136, 24)
+        Me.Button5.TabIndex = 153
+        Me.Button5.Text = "Refresh Student Folders"
+        '
+        'Main_Screen
+        '
+        Me.AutoScaleBaseSize = New System.Drawing.Size(5, 13)
+        Me.BackColor = System.Drawing.Color.PowderBlue
+        Me.ClientSize = New System.Drawing.Size(642, 488)
+        Me.Controls.Add(Me.Button5)
+        Me.Controls.Add(Me.Panel3)
+        Me.Controls.Add(Me.Panel1)
+        Me.Controls.Add(Me.lblProceed)
+        Me.Controls.Add(Me.Label8)
+        Me.Controls.Add(Me.Button3)
+        Me.Controls.Add(Me.Label9)
+        Me.Controls.Add(Me.Button4)
+        Me.Controls.Add(Me.Panel2)
+        Me.ForeColor = System.Drawing.Color.Black
+        Me.FormBorderStyle = System.Windows.Forms.FormBorderStyle.FixedSingle
+        Me.Icon = CType(resources.GetObject("$this.Icon"), System.Drawing.Icon)
+        Me.MaximizeBox = False
+        Me.Name = "Main_Screen"
+        Me.ShowInTaskbar = False
+        Me.Text = "Student Handin Project Creator 1.0"
+        Me.Panel1.ResumeLayout(False)
+        Me.Panel2.ResumeLayout(False)
+        Me.Panel3.ResumeLayout(False)
+        Me.ResumeLayout(False)
+
+    End Sub
+
+#End Region
+
+
+    Private current_light As Integer = 0
+    Private current_colour As Integer = 0
+    Private currently_working As Boolean = False
+
+    '    Private filefolder As String
+
+
+    Private Sub Error_Handler(ByVal ex As Exception, Optional ByVal identifier_msg As String = "")
+        Try
+            If ex.Message.IndexOf("Thread was being aborted") < 0 Then
+                Dim Display_Message1 As New Display_Message("The Application encountered the following problem: " & vbCrLf & identifier_msg & ":" & ex.ToString)
+                Display_Message1.ShowDialog()
+                Dim dir As DirectoryInfo = New DirectoryInfo((Application.StartupPath & "\").Replace("\\", "\") & "Error Logs")
+                If dir.Exists = False Then
+                    dir.Create()
+                End If
+                Dim filewriter As StreamWriter = New StreamWriter((Application.StartupPath & "\").Replace("\\", "\") & "Error Logs\" & Format(Now(), "yyyyMMdd") & "_Error_Log.txt", True)
+                filewriter.WriteLine("#" & Format(Now(), "dd/MM/yyyy HH:mm:ss") & " - " & identifier_msg & ":" & ex.ToString)
+                filewriter.Flush()
+                filewriter.Close()
+            End If
+        Catch exc As Exception
+            MsgBox("An error occurred in Student Handin Project Creator's error handling routine. The application will try to recover from this serious error.", MsgBoxStyle.Critical, "Critical Error Encountered")
+        End Try
+    End Sub
+
+    Public Sub Load_Registry_Values()
+        Try
+            Dim configflag As Boolean
+            configflag = False
+            Dim str As String
+            Dim keyflag1 As Boolean = False
+            Dim oReg As RegistryKey = Registry.LocalMachine
+            Dim keys() As String = oReg.GetSubKeyNames()
+            System.Array.Sort(keys)
+
+            For Each str In keys
+                If str.Equals("Software\Student Handin Project Creator") = True Then
+                    keyflag1 = True
+                    Exit For
+                End If
+            Next str
+
+            If keyflag1 = False Then
+                oReg.CreateSubKey("Software\Student Handin Project Creator")
+            End If
+
+            keyflag1 = False
+
+            Dim oKey As RegistryKey = oReg.OpenSubKey("Software\Student Handin Project Creator", True)
+
+            str = oKey.GetValue("RootDirectory")
+            If Not IsNothing(str) And Not (str = "") Then
+                filefoldertxt.Text = str
+            Else
+                configflag = True
+                oKey.SetValue("RootDirectory", "\\Comlab\Vol2\handin")
+                filefoldertxt.Text = "\\Comlab\Vol2\handin"
+            End If
+
+
+            str = oKey.GetValue("lstDepartments")
+            If Not IsNothing(str) And Not (str = "") Then
+                lastDepartments = str
+            Else
+                configflag = True
+                oKey.SetValue("lstDepartments", "")
+                lastDepartments = ""
+            End If
+
+            str = oKey.GetValue("lstCourses")
+            If Not IsNothing(str) And Not (str = "") Then
+                lastCourses = str
+            Else
+                configflag = True
+                oKey.SetValue("lstCourses", "")
+                lastCourses = ""
+            End If
+
+            str = oKey.GetValue("lstAssignments")
+            If Not IsNothing(str) And Not (str = "") Then
+                lastAssignments = str
+            Else
+                configflag = True
+                oKey.SetValue("lstAssignments", "")
+                lastAssignments = ""
+            End If
+            oKey.Close()
+            oReg.Close()
+
+        Catch ex As Exception
+            Error_Handler(ex)
+        End Try
+    End Sub
+
+    Private Sub Save_Registry_Values()
+        Try
+            Dim oReg As RegistryKey = Registry.LocalMachine
+            Dim oKey As RegistryKey = oReg.OpenSubKey("Software\Student Handin Project Creator", True)
+
+            oKey.SetValue("RootDirectory", filefoldertxt.Text)
+            oKey.SetValue("lstDepartments", lstDepartment.Text)
+            oKey.SetValue("lstCourses", lstCourses.Text)
+            oKey.SetValue("lstAssignments", lstAssignments.Text)
+
+            oKey.Close()
+            oReg.Close()
+        Catch ex As Exception
+            Error_Handler(ex)
+        End Try
+    End Sub
+
+    Private Sub run_green_lights()
+        Try
+            Label1.ForeColor = Color.LimeGreen
+            Label1.Text = "Waiting"
+            '  Label7.Text = "Resting..."
+
+            current_light = current_light - 1
+            If current_light < 1 Then
+                current_light = 5
+            End If
+            current_colour = 0
+            PictureBox1.Image = ImageList1.Images(1)
+            PictureBox2.Image = ImageList1.Images(1)
+            PictureBox3.Image = ImageList1.Images(1)
+            PictureBox4.Image = ImageList1.Images(1)
+            PictureBox5.Image = ImageList1.Images(1)
+
+            Select Case current_light
+                Case 0
+
+                    PictureBox1.Image = ImageList1.Images(0)
+                Case 1
+
+                    PictureBox2.Image = ImageList1.Images(0)
+                Case 2
+
+                    PictureBox3.Image = ImageList1.Images(0)
+                Case 3
+
+                    PictureBox4.Image = ImageList1.Images(0)
+                Case 4
+
+                    PictureBox5.Image = ImageList1.Images(0)
+                Case 5
+
+                    PictureBox1.Image = ImageList1.Images(0)
+            End Select
+
+            current_light = current_light + 1
+            If current_light > 5 Then
+                current_light = 1
+            End If
+        Catch ex As Exception
+            Error_Handler(ex)
+        End Try
+    End Sub
+
+    Private Sub run_orange_lights()
+        Try
+            Label1.ForeColor = Color.DarkOrange
+            Label1.Text = "Working"
+
+            current_light = current_light - 1
+            If current_light < 1 Then
+                current_light = 5
+            End If
+            current_colour = 1
+            PictureBox1.Image = ImageList1.Images(3)
+            PictureBox2.Image = ImageList1.Images(3)
+            PictureBox3.Image = ImageList1.Images(3)
+            PictureBox4.Image = ImageList1.Images(3)
+            PictureBox5.Image = ImageList1.Images(3)
+            Select Case current_light
+                Case 0
+                    PictureBox1.Image = ImageList1.Images(2)
+                Case 1
+                    PictureBox2.Image = ImageList1.Images(2)
+                Case 2
+                    PictureBox3.Image = ImageList1.Images(2)
+                Case 3
+                    PictureBox4.Image = ImageList1.Images(2)
+                Case 4
+                    PictureBox5.Image = ImageList1.Images(2)
+                Case 5
+                    PictureBox1.Image = ImageList1.Images(2)
+            End Select
+
+            current_light = current_light + 1
+            If current_light > 5 Then
+                current_light = 1
+            End If
+        Catch ex As Exception
+            Error_Handler(ex)
+        End Try
+    End Sub
+
+    Private Sub run_lights()
+        Try
+            If current_colour = 1 Then
+                Select Case current_light
+                    Case 0
+                        PictureBox5.Image = ImageList1.Images(3)
+                        PictureBox1.Image = ImageList1.Images(2)
+                    Case 1
+                        PictureBox1.Image = ImageList1.Images(3)
+                        PictureBox2.Image = ImageList1.Images(2)
+                    Case 2
+                        PictureBox2.Image = ImageList1.Images(3)
+                        PictureBox3.Image = ImageList1.Images(2)
+                    Case 3
+                        PictureBox3.Image = ImageList1.Images(3)
+                        PictureBox4.Image = ImageList1.Images(2)
+                    Case 4
+                        PictureBox4.Image = ImageList1.Images(3)
+                        PictureBox5.Image = ImageList1.Images(2)
+                    Case 5
+                        PictureBox5.Image = ImageList1.Images(3)
+                        PictureBox1.Image = ImageList1.Images(2)
+                End Select
+            Else
+                Select Case current_light
+                    Case 0
+                        PictureBox5.Image = ImageList1.Images(1)
+                        PictureBox1.Image = ImageList1.Images(0)
+                    Case 1
+                        PictureBox1.Image = ImageList1.Images(1)
+                        PictureBox2.Image = ImageList1.Images(0)
+                    Case 2
+                        PictureBox2.Image = ImageList1.Images(1)
+                        PictureBox3.Image = ImageList1.Images(0)
+                    Case 3
+                        PictureBox3.Image = ImageList1.Images(1)
+                        PictureBox4.Image = ImageList1.Images(0)
+                    Case 4
+                        PictureBox4.Image = ImageList1.Images(1)
+                        PictureBox5.Image = ImageList1.Images(0)
+                    Case 5
+                        PictureBox5.Image = ImageList1.Images(1)
+                        PictureBox1.Image = ImageList1.Images(0)
+                End Select
+
+            End If
+
+            current_light = current_light + 1
+            If current_light > 5 Then
+                current_light = 1
+            End If
+        Catch ex As Exception
+            Error_Handler(ex)
+        End Try
+    End Sub
+
+    Private Sub Timer2_Tick(ByVal sender As System.Object, ByVal e As System.EventArgs) Handles Timer2.Tick
+        Try
+            run_lights()
+            Label8.Text = Format(Now(), "dd/MM/yyyy HH:mm:ss")
+            If application_exit = True Then
+                dataloaded = True
+                splash_loader.Visible = False
+                Me.Close()
+            End If
+        Catch ex As Exception
+            Error_Handler(ex)
+        End Try
+    End Sub
+
+    Private Sub Main_Screen_Load(ByVal sender As System.Object, ByVal e As System.EventArgs) Handles MyBase.Load
+        Try
+            Label8.Text = Format(Now(), "dd/MM/yyyy HH:mm:ss")
+            Label10.Text = Format(Now(), "dd/MM/yyyy HH:mm:ss")
+            Timer2.Start()
+            ' dataloaded = True
+
+            application_exit = False
+            'Label8.Text = Format(Now(), "dd/MM/yyyy HH:mm:ss")
+            'Timer2.Start()
+
+            yearopen.Text = Format(Now(), "yyyy")
+            yearclose.Text = Format(Now(), "yyyy")
+            monthopen.Text = "01"
+            monthclose.Text = "12"
+            dayopen.Text = "01"
+            dayclose.Text = "31"
+            houropen.Text = "08"
+            hourclose.Text = "16"
+            minuteopen.Text = "00"
+            minuteclose.Text = "00"
+
+            If (Not Worker1.ReturnRegKeyValue("HKEY_LOCAL_MACHINE", "SOFTWARE\Student Handin Project Creator", "RootDirectory") = "") And (Worker1.ReturnRegKeyValue("HKEY_LOCAL_MACHINE", "SOFTWARE\Student Handin Project Creator", "RootDirectory") Is Nothing = False) And (Not Worker1.ReturnRegKeyValue("HKEY_LOCAL_MACHINE", "SOFTWARE\Student Handin Project Creator", "RootDirectory").StartsWith("Fail") = True) Then
+                RootDirectory = Worker1.ReturnRegKeyValue("HKEY_LOCAL_MACHINE", "SOFTWARE\Student Handin Project Creator", "RootDirectory")
+            Else
+                Worker1.CreateSubRegKey("HKEY_LOCAL_MACHINE", "SOFTWARE\Student Handin Project Creator", "RootDirectory", "")
+                Worker1.SetRegKeyValue("HKEY_LOCAL_MACHINE", "SOFTWARE\Student Handin Project Creator", "RootDirectory", "\\Comlab\Vol2\handin")
+                RootDirectory = Worker1.ReturnRegKeyValue("HKEY_LOCAL_MACHINE", "SOFTWARE\Student Handin Project Creator", "RootDirectory")
+            End If
+
+            If RootDirectory.StartsWith("Fail") = True Then
+
+                Dim Display_Message1 As New Display_Message("An usable Handin directory cannot be located and as such this application will now shut down.")
+                Display_Message1.ShowDialog()
+                application_exit = True
+
+            End If
+            InitialRootDirectory = RootDirectory
+            filefoldertxt.Text = InitialRootDirectory
+            If RootDirectory.StartsWith("\\") Then
+
+                RootDirectory = Worker1.MapDrive(RootDirectory)
+
+            End If
+            If Not (RootDirectory).IndexOf("Fail") = -1 Then
+                Dim Display_Message1 As New Display_Message("An usable Handin directory cannot be located and as such this application will now shut down.")
+                Display_Message1.ShowDialog()
+                application_exit = True
+
+            End If
+            Dim dinfo As DirectoryInfo = New DirectoryInfo(RootDirectory)
+            Dim yearfound As Boolean = False
+            Dim dinfo2 As DirectoryInfo
+            For Each dinfo2 In dinfo.GetDirectories
+                If dinfo2.Name = Format(Now(), "yyyy") Then
+                    yearfound = True
+                    Exit For
+                End If
+            Next
+            If yearfound = False Then
+                dinfo = New DirectoryInfo(RootDirectory)
+                dinfo.CreateSubdirectory(Format(Now(), "yyyy"))
+                'CommunicationLabel1.Text = "Sorry, but no valid project hand-in folders have been created for " & Format(Now(), "yyyy") & ". "
+                'CommunicationLabel2.Text = ""
+                ' lstDepartment.Enabled = False
+                '                statsDepartment.Text = ""
+                '               lstCourses.Enabled = False
+                '              statsCourses.Text = ""
+                '             statsCoursesTotal.Text = ""
+                '            lstAssignments.Enabled = False
+                '           statsAssignments.Text = ""
+                '          statsAssignmentsTotal.Text = ""
+            End If
+            lstDepartment.Enabled = True
+            dinfo = New DirectoryInfo((RootDirectory & "\").Replace("\\", "\") & Format(Now(), "yyyy"))
+            '            lstDepartmentCover.Text = ""
+            lstDepartment.Items.Clear()
+            lstDepartment.Text = ""
+            For Each dinfo2 In dinfo.GetDirectories
+                lstDepartment.Items.Add(New MTGCComboBoxItem(dinfo2.Name))
+            Next
+            'End If
+            If lstDepartment.Items.Count > 0 Then
+                lstDepartment.Enabled = True
+                lstDepartment.SelectedIndex = 0
+            Else
+                '  lstDepartment.Enabled = False
+                statsDepartment.Text = ""
+                ' lstCourses.Enabled = False
+                statsCourses.Text = ""
+                ' statsCoursesTotal.Text = ""
+                'lstAssignments.Enabled = False
+                statsAssignments.Text = ""
+                'statsAssignmentsTotal.Text = ""
+            End If
+            If lstDepartment.Items.Count = 1 Then
+                statsDepartment.Text = lstDepartment.Items.Count & " Department available to choose from."
+            Else
+                statsDepartment.Text = lstDepartment.Items.Count & " Departments available to choose from."
+            End If
+            dinfo = Nothing
+            dinfo2 = Nothing
+            Load_Registry_Values()
+            lstDepartment.Text = lastDepartments
+            lstCourses.Text = lastCourses
+            lstAssignments.Text = lastAssignments
+
+
+            dataloaded = True
+            splash_loader.Opacity = 0
+            splash_loader.WindowState = FormWindowState.Minimized
+            splash_loader.Visible = False
+        Catch ex As Exception
+            Error_Handler(ex)
+        End Try
+    End Sub
+
+    Private Sub exit_application()
+
+        Try
+          
+            shutting_down = True
+            Me.Opacity = 0
+            Me.WindowState = FormWindowState.Minimized
+            Me.Visible = False
+            Timer2.Stop()
+            If RootDirectory.IndexOf("Fail") = -1 Then
+
+
+                If InitialRootDirectory.StartsWith("\\") Then
+                    RootDirectory = Worker1.UnMapDrive(RootDirectory)
+                End If
+            End If
+            If Worker1.WorkerThread Is Nothing = False Then
+                Worker1.WorkerThread.Abort()
+                Worker1.Dispose()
+            End If
+            NotifyIcon1.Dispose()
+            Save_Registry_Values()
+            Application.Exit()
+        Catch ex As Exception
+            Error_Handler(ex, "Shutting Down Application")
+        Finally
+            Application.Exit()
+        End Try
+    End Sub
+
+    Private Sub Main_Screen_closed(ByVal sender As Object, ByVal e As System.EventArgs) Handles MyBase.Closed
+        Try
+            exit_application()
+        Catch ex As Exception
+            Error_Handler(ex)
+        End Try
+    End Sub
+
+
+    Public Sub WorkerHandler(ByVal Result As String)
+        Try
+            currently_working = False
+            Label19.Text = Format(Now(), "dd/MM/yyyy HH:mm:ss")
+            NotifyIcon1.Text = "Resting... "
+            LoadCourseFolders((RootDirectory & "\" & Format(Now, "yyyy") & "\" & lstDepartment.Text).Replace("\\", "\"))
+            LoadAssignmentFolders((RootDirectory & "\" & Format(Now, "yyyy") & "\" & lstDepartment.Text & "\" & lstCourses.Text).Replace("\\", "\"))
+            run_green_lights()
+        Catch ex As Exception
+            Error_Handler(ex)
+        End Try
+    End Sub
+
+    Public Sub WorkerProgressHandler(ByVal FoldersCreated As Long)
+        Try
+            Label12.Text = (FoldersCreated).ToString
+
+        Catch ex As Exception
+            Error_Handler(ex)
+        End Try
+    End Sub
+
+    Private Sub run_worker(Optional ByVal refresh As Boolean = False)
+        run_orange_lights()
+        Label11.Text = ""
+        Label12.Text = ""
+        Label19.Text = ""
+        Label11.Text = Format(Now(), "dd/MM/yyyy HH:mm:ss")
+
+        Worker1.refresh = refresh
+        Worker1.rootdirectory = RootDirectory
+        Worker1.department = lstDepartment.Text
+        Worker1.course = lstCourses.Text
+        Worker1.project = lstAssignments.Text
+        Worker1.opendate = New Date(CInt(yearopen.Text), CInt(monthopen.Text), CInt(dayopen.Text), CInt(houropen.Text), CInt(minuteopen.Text), 0)
+        Worker1.closedate = New Date(CInt(yearclose.Text), CInt(monthclose.Text), CInt(dayclose.Text), CInt(hourclose.Text), CInt(minuteclose.Text), 0)
+
+        Worker1.ChooseThreads(1)
+        currently_working = True
+    End Sub
+
+
+
+    Private Sub MenuItem3_Click(ByVal sender As System.Object, ByVal e As System.EventArgs) Handles MenuItem3.Click
+        Try
+            Me.Close()
+        Catch ex As Exception
+            Error_Handler(ex)
+        End Try
+    End Sub
+
+    Private Sub show_application()
+        Try
+            Me.Opacity = 1
+
+            Me.BringToFront()
+            Me.Refresh()
+            Me.WindowState = FormWindowState.Normal
+
+        Catch ex As Exception
+            Error_Handler(ex)
+        End Try
+    End Sub
+
+    Private Sub NotifyIcon1_dblclick(ByVal sender As Object, ByVal e As System.EventArgs) Handles NotifyIcon1.DoubleClick
+        show_application()
+    End Sub
+    Private Sub NotifyIcon1_snglclick(ByVal sender As Object, ByVal e As System.EventArgs) Handles NotifyIcon1.Click
+        show_application()
+    End Sub
+
+    Private Sub MenuItem1_Click(ByVal sender As System.Object, ByVal e As System.EventArgs) Handles MenuItem1.Click
+        show_application()
+    End Sub
+
+    Private Sub Main_Screen_resize(ByVal sender As Object, ByVal e As System.EventArgs) Handles MyBase.Resize
+        Try
+
+            If Me.WindowState = FormWindowState.Minimized Then
+                NotifyIcon1.Visible = True
+                Me.Opacity = 0
+            End If
+        Catch ex As Exception
+            Error_Handler(ex)
+        End Try
+    End Sub
+
+    Private Sub force_check()
+        Try
+            Dim opendate As Date
+            Try
+                opendate = New Date(CInt(yearopen.Text), CInt(monthopen.Text), CInt(dayopen.Text), CInt(houropen.Text), CInt(minuteopen.Text), 0)
+            Catch ex As Exception
+                MsgBox("You need to enter appropriate values for the opening time/date value. """ & (yearopen.Text) & "/" & (monthopen.Text) & "/" & (dayopen.Text) & " " & (houropen.Text) & ":" & (minuteopen.Text) & ":" & "00"" is not a valid date/time object", MsgBoxStyle.Information, "Invalid Inputs Detected")
+                Exit Sub
+            End Try
+            Dim closedate As Date
+            Try
+                closedate = New Date(CInt(yearclose.Text), CInt(monthclose.Text), CInt(dayclose.Text), CInt(hourclose.Text), CInt(minuteclose.Text), 0)
+            Catch ex As Exception
+                MsgBox("You need to enter appropriate values for the closing time/date value. """ & (yearclose.Text) & "/" & (monthclose.Text) & "/" & (dayclose.Text) & " " & (hourclose.Text) & ":" & (minuteclose.Text) & ":" & "00"" is not a valid date/time object", MsgBoxStyle.Information, "Invalid Inputs Detected")
+                Exit Sub
+            End Try
+
+            If closedate < opendate Then
+                MsgBox("The opening date cannot be less that the closing date. Please ensure you have filled these fields in correctly", MsgBoxStyle.Information, "Invalid Inputs Detected")
+                Exit Sub
+            End If
+            If lstDepartment.Text.Length > 0 And lstCourses.Text.Length > 0 And lstAssignments.Text.Length > 0 Then
+
+
+                'If filefoldertxt.Text.StartsWith("\\") Then
+                '    MsgBox("\" & (filefoldertxt.Text & "\" & Format(Now(), "yyyy") & "\" & lstDepartment.Text & "\" & lstCourses.Text & "\" & lstAssignments.Text).Replace("\\", "\"))
+                'Else
+                '    MsgBox((filefoldertxt.Text & "\" & Format(Now(), "yyyy") & "\" & lstDepartment.Text & "\" & lstCourses.Text & "\" & lstAssignments.Text).Replace("\\", "\"))
+                'End If
+                'MsgBox((RootDirectory & "\" & Format(Now(), "yyyy") & "\" & lstDepartment.Text & "\" & lstCourses.Text & "\" & lstAssignments.Text).Replace("\\", "\"))
+
+
+                '  Label7.Text = "Busy Working..."
+                NotifyIcon1.Text = "Generating Folders..."
+                If currently_working = False Then
+                    run_worker()
+                End If
+            Else
+                MsgBox("You need to enter values in the Department, Course and Project fields in order to generate a valid project folder", MsgBoxStyle.Information, "Invalid Inputs Detected")
+            End If
+        Catch ex As Exception
+            Error_Handler(ex)
+        End Try
+    End Sub
+
+
+    Private Sub Button3_Click(ByVal sender As System.Object, ByVal e As System.EventArgs) Handles Button3.Click
+        force_check()
+    End Sub
+
+    Private Sub Refresh_Folders()
+        Try
+            lstDepartment.Items.Clear()
+            lstDepartment.Text = ""
+            lstCourses.Items.Clear()
+            lstCourses.Text = ""
+            lstAssignments.Items.Clear()
+            lstAssignments.Text = ""
+            RootDirectory = filefoldertxt.Text
+            InitialRootDirectory = RootDirectory
+
+            If RootDirectory.StartsWith("\\") Then
+                RootDirectory = Worker1.MapDrive(RootDirectory)
+            End If
+            If Not (RootDirectory).IndexOf("Fail") = -1 Then
+                Dim Display_Message1 As New Display_Message("An usable Handin directory cannot be located and as such this application will now shut down.")
+                Display_Message1.ShowDialog()
+                ' application_exit = True
+            End If
+            Dim dinfo As DirectoryInfo = New DirectoryInfo(RootDirectory)
+
+            Dim dinfo2 As DirectoryInfo
+            If dinfo.Exists = True Then
+                Dim yearfound As Boolean = False
+
+                For Each dinfo2 In dinfo.GetDirectories
+                    If dinfo2.Name = Format(Now(), "yyyy") Then
+                        yearfound = True
+                        Exit For
+                    End If
+                Next
+                If yearfound = False Then
+                    dinfo = New DirectoryInfo(RootDirectory)
+                    dinfo.CreateSubdirectory(Format(Now(), "yyyy"))
+                    'CommunicationLabel1.Text = "Sorry, but no valid project hand-in folders have been created for " & Format(Now(), "yyyy") & ". "
+                    'CommunicationLabel2.Text = ""
+                    ' lstDepartment.Enabled = False
+                    '                statsDepartment.Text = ""
+                    '               lstCourses.Enabled = False
+                    '              statsCourses.Text = ""
+                    '             statsCoursesTotal.Text = ""
+                    '            lstAssignments.Enabled = False
+                    '           statsAssignments.Text = ""
+                    '          statsAssignmentsTotal.Text = ""
+                End If
+                lstDepartment.Enabled = True
+                dinfo = New DirectoryInfo((RootDirectory & "\").Replace("\\", "\") & Format(Now(), "yyyy"))
+                ' lstDepartmentCover.Text = ""
+                lstDepartment.Items.Clear()
+                lstDepartment.Text = ""
+                For Each dinfo2 In dinfo.GetDirectories
+                    lstDepartment.Items.Add(New MTGCComboBoxItem(dinfo2.Name))
+                Next
+                'End If
+                If lstDepartment.Items.Count > 0 Then
+                    lstDepartment.Enabled = True
+                    lstDepartment.SelectedIndex = 0
+                Else
+                    '  lstDepartment.Enabled = False
+                    statsDepartment.Text = ""
+                    ' lstCourses.Enabled = False
+                    statsCourses.Text = ""
+                    ' statsCoursesTotal.Text = ""
+                    'lstAssignments.Enabled = False
+                    statsAssignments.Text = ""
+                    '  statsAssignmentsTotal.Text = ""
+                End If
+                If lstDepartment.Items.Count = 1 Then
+                    statsDepartment.Text = lstDepartment.Items.Count & " Department available to choose from."
+                Else
+                    statsDepartment.Text = lstDepartment.Items.Count & " Departments available to choose from."
+                End If
+            Else
+                Dim Display_Message1 As New Display_Message("An usable Handin directory cannot be located and as such this application will now shut down.")
+                Display_Message1.ShowDialog()
+            End If
+            dinfo = Nothing
+            dinfo2 = Nothing
+        Catch ex As Exception
+            Error_Handler(ex, "Refresh Folders")
+        End Try
+    End Sub
+
+    Private Sub Button1_Click(ByVal sender As System.Object, ByVal e As System.EventArgs) Handles Button1.Click
+        Refresh_Folders()
+    End Sub
+
+    Private Sub Button4_Click(ByVal sender As System.Object, ByVal e As System.EventArgs) Handles Button4.Click
+        Try
+            If Worker1.WorkerThread Is Nothing = False Then
+                Worker1.WorkerThread.Abort()
+                Worker1.Dispose()
+            End If
+        Catch ex As Exception
+            Error_Handler(ex)
+        Finally
+            WorkerHandler("Killed")
+        End Try
+    End Sub
+
+
+    Private Sub lstDepartment_SelectedIndexChanged(ByVal sender As System.Object, ByVal e As System.EventArgs) Handles lstDepartment.SelectedIndexChanged
+        Try
+            ' lstDepartmentCover.Text = lstDepartment.SelectedItem.text
+            lblProceed.Text = lstDepartment.Text
+            LoadCourseFolders((RootDirectory & "\" & Format(Now, "yyyy") & "\" & lstDepartment.Text).Replace("\\", "\"))
+        Catch ex As Exception
+            Error_Handler(ex, "lstDepartment_SelectedIndexChanged")
+        End Try
+    End Sub
+
+    Private Sub lstCourses_SelectedIndexChanged(ByVal sender As System.Object, ByVal e As System.EventArgs) Handles lstCourses.SelectedIndexChanged
+        Try
+            ' lstCoursesCover.Text = lstCourses.SelectedItem.text
+            lblProceed.Text = lstDepartment.Text & "\" & lstCourses.Text
+            LoadAssignmentFolders((RootDirectory & "\" & Format(Now, "yyyy") & "\" & lstDepartment.Text & "\" & lstCourses.Text).Replace("\\", "\"))
+        Catch ex As Exception
+            Error_Handler(ex, "lstCourses_SelectedIndexChanged")
+        End Try
+    End Sub
+
+    Private Sub LoadCourseFolders(ByVal targetdir As String)
+        Try
+            Dim dinfo2 As DirectoryInfo
+            Dim dinfo As DirectoryInfo = New DirectoryInfo(targetdir)
+            Dim missedcourses As Integer = 0
+            If dinfo.Exists = True Then
+                lstCourses.Items.Clear()
+                '  lstCoursesCover.Text = ""
+                lstCourses.Text = ""
+                lstAssignments.Items.Clear()
+                ' lstAssignmentsCover.Text = ""
+                lstAssignments.Text = ""
+                For Each dinfo2 In dinfo.GetDirectories
+                    ' If RegisteredCourses.Items.IndexOf(dinfo2.Name) > -1 Then
+                    lstCourses.Items.Add(New MTGCComboBoxItem(dinfo2.Name))
+                    'Else
+                    '   missedcourses = missedcourses + 1
+                    'End If
+
+
+                Next
+
+            End If
+
+            If lstCourses.Items.Count > 0 Then
+                lstCourses.Enabled = True
+                '  lstCourses.SelectedIndex = 0
+
+                If lstCourses.Items.Count = 1 Then
+                    statsCourses.Text = lstCourses.Items.Count & " Course available to choose from under " & lstDepartment.Text & "."
+                Else
+                    statsCourses.Text = lstCourses.Items.Count & " Courses available to choose from under " & lstDepartment.Text & "."
+                End If
+
+            Else
+                If lstCourses.Items.Count = 1 Then
+                    statsCourses.Text = lstCourses.Items.Count & " Course available to choose from under " & lstDepartment.Text & "."
+                Else
+                    statsCourses.Text = lstCourses.Items.Count & " Courses available to choose from under " & lstDepartment.Text & "."
+                End If
+                statsAssignments.Text = ""
+
+            End If
+            dinfo2 = Nothing
+            dinfo = Nothing
+        Catch ex As Exception
+            Error_Handler(ex, "LoadCourseFolders")
+        End Try
+    End Sub
+
+
+    Private Sub lstAssignments_SelectedIndexChanged(ByVal sender As System.Object, ByVal e As System.EventArgs) Handles lstAssignments.SelectedIndexChanged
+        Try
+            ' lstAssignmentsCover.Text = lstAssignments.SelectedItem.text
+            lblProceed.Text = lstDepartment.Text & "\" & lstCourses.Text & "\" & lstAssignments.Text
+
+            'Worker1.department = lstDepartment.Text
+            'Worker1.course = lstCourses.Text
+            'Worker1.project = lstAssignments.Text
+
+            Dim dinfo1 As FileInfo = New FileInfo((RootDirectory & "\" & Format(Now(), "yyyy") & "\" & lstDepartment.Text & "\" & lstCourses.Text & "\" & lstAssignments.Text & "\access.ini").Replace("\\", "\"))
+            If dinfo1.Exists = True Then
+
+                Dim filereader As StreamReader = New StreamReader(dinfo1.FullName)
+                Dim lineread As String = ""
+                Dim opentime As String
+                Dim closetime As String
+                While Not filereader.Peek = -1
+                    lineread = filereader.ReadLine
+                    If lineread.ToLower.StartsWith("open:") Then
+                        opentime = lineread.Replace("open:", "")
+                    End If
+                    If lineread.ToLower.StartsWith("close:") Then
+                        closetime = lineread.Replace("close:", "")
+                    End If
+                End While
+                filereader.Close()
+                filereader = Nothing
+                If opentime.Length = 12 And closetime.Length = 12 Then
+                    yearopen.Text = opentime.Substring(0, 4)
+                    monthopen.Text = opentime.Substring(4, 2)
+                    dayopen.Text = opentime.Substring(6, 2)
+                    houropen.Text = opentime.Substring(8, 2)
+                    minuteopen.Text = opentime.Substring(10, 2)
+
+                    yearclose.Text = closetime.Substring(0, 4)
+                    monthclose.Text = closetime.Substring(4, 2)
+                    dayclose.Text = closetime.Substring(6, 2)
+                    hourclose.Text = closetime.Substring(8, 2)
+                    minuteclose.Text = closetime.Substring(10, 2)
+                End If
+            End If
+            dinfo1 = Nothing
+        Catch ex As Exception
+            Error_Handler(ex, "lstAssignments_SelectedIndexChanged")
+        End Try
+    End Sub
+
+    Private Sub LoadAssignmentFolders(ByVal targetdir As String)
+        Try
+            Dim dinfo2 As DirectoryInfo
+            Dim dinfo As DirectoryInfo = New DirectoryInfo(targetdir)
+
+            If dinfo.Exists = True Then
+                lstAssignments.Items.Clear()
+                '  lstAssignmentsCover.Text = ""
+                lstAssignments.Text = ""
+                For Each dinfo2 In dinfo.GetDirectories
+
+                    lstAssignments.Items.Add(New MTGCComboBoxItem(dinfo2.Name))
+
+                Next
+
+            End If
+
+            If lstAssignments.Items.Count > 0 Then
+                lstAssignments.Enabled = True
+                'lstAssignments.SelectedIndex = 0
+
+                If lstAssignments.Items.Count = 1 Then
+                    statsAssignments.Text = lstAssignments.Items.Count & " Assignment available to choose from under " & lstCourses.Text & "."
+                Else
+                    statsAssignments.Text = lstAssignments.Items.Count & " Assignments available to choose from under " & lstCourses.Text & "."
+                End If
+
+            Else
+
+                If lstAssignments.Items.Count = 1 Then
+                    statsAssignments.Text = lstAssignments.Items.Count & " Assignment available to choose from under " & lstCourses.Text & "."
+                Else
+                    statsAssignments.Text = lstAssignments.Items.Count & " Assignments available to choose from under " & lstCourses.Text & "."
+                End If
+                ' lstAssignments.Enabled = False
+
+                '                statsAssignmentsTotal.Text = ""
+            End If
+            dinfo2 = Nothing
+            dinfo = Nothing
+        Catch ex As Exception
+            Error_Handler(ex, "LoadAssignmentFolders")
+        End Try
+    End Sub
+
+
+    Private Sub Button2_Click(ByVal sender As System.Object, ByVal e As System.EventArgs) Handles Button2.Click
+        Try
+            Dim result As DialogResult = FolderBrowserDialog1.ShowDialog
+            If result = DialogResult.OK Then
+                filefoldertxt.Text = FolderBrowserDialog1.SelectedPath
+                Refresh_Folders()
+            End If
+
+        Catch ex As Exception
+            Error_Handler(ex)
+        End Try
+
+    End Sub
+
+
+    Private Sub Button5_Click(ByVal sender As System.Object, ByVal e As System.EventArgs) Handles Button5.Click
+        Try
+            If lstDepartment.Text.Length > 0 And lstCourses.Text.Length > 0 And lstAssignments.Text.Length > 0 Then
+                NotifyIcon1.Text = "Generating Folders..."
+                If currently_working = False Then
+                    run_worker(True)
+                End If
+            Else
+                MsgBox("You need to enter values in the Department, Course and Project fields in order to generate a valid project folder", MsgBoxStyle.Information, "Invalid Inputs Detected")
+            End If
+        Catch ex As Exception
+            Error_Handler(ex)
+        End Try
+    End Sub
+End Class

@@ -1,0 +1,3 @@
+APPLICATION_NAME=Student Handin Project Creator
+EXECUTABLE=Student Handin Project Creator.exe
+MANIFEST=http://www.commerce.uct.ac.za/Services/CodeUnit/AutoUpdate/Student Handin Project Creator/manifest.xml

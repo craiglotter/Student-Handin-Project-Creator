@@ -1,0 +1,11 @@
+To create a hand-in project in the Root Directory, simply select from existing folder names or type in new folder names in the "Department" and "Course" drop down lists. Enter the Project Title last and adjust the project access date/time accordingly. Once you click on the "Proceed" button you will be prompted to accept the given project hand-in path to be created, which you need to accept in order to continue.
+
+The "Refresh Student Folders" button will force the application to refresh the student folders for a currently selected project folder.
+
+The batch creation function allows you to automate the creation of a number of handin folders all at once. The input text file you choose to load must conform to the following standard: #department#;#course#;#project#;#open_yyyymmddHHMM#;#close_yyyymmddHHMM#
+
+The "Kill Processes" button terminates running threads – note that this may leave you with an un stable project folder setup and it is suggested you remove the folder you were trying to generate in its entirety
+
+The Windows Server/Novell Server switch determines for which environment the folders need to be generated. In a Windows environment the folder rights are determined by the parent folder rights whilst in Novell each student folder has specific rights assigned to it.
+
+-- Last Updated: 13/08/2007 --
